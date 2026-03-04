@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environment
+entorno/
+venv/
+.env/
+
+# Data lake generated data
+data_lake/
+
+# Delta Lake transaction logs
+_delta_log/
+
+# VSCode
+.vscode/
+
+# OS files
+.DS_Store
