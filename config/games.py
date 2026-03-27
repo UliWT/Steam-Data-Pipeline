@@ -7,7 +7,7 @@ GAMES = {
     271590: "GTA V",
     252490: "Rust",
     2767030: "Marvel Rivals",
-    15511360: "Forza Horizon 5",
+    1551360: "Forza Horizon 5",
     1245620: "Elden Ring",
     1174180: "Red Dead Redemption 2"
 }
