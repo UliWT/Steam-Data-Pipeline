@@ -6,50 +6,80 @@ from transform.dataframes import (
 )
 
 from load.delta_writer import (
-    write_players_delta,
-    write_metadata_delta,
-    write_processed_players
+    write_players_raw,
+    write_metadata_raw,
+    write_silver_players,
+    write_silver_metadata,
+    write_gold_players_stats
 )
 
 from transform.processing import (
-    load_players_data,
-    load_metadata_data,
-    process_players_data
+    load_raw_players,
+    load_raw_metadata,
+    load_silver_players,
+    load_silver_metadata,
+    clean_players_data,
+    clean_metadata_data,
+    create_gold_aggregations
 )
 
 
 def main():
 
     # ===============================
-    # ETAPA 1: RAW
+    # ETAPA 1: BRONZE (RAW)
     # ===============================
+    print("\n--- ETAPA 1: BRONZE (RAW) ---")
+    
+    # Extraer y guardar jugadores
+    players_raw_df = build_players_dataframe(GAMES)
+    write_players_raw(players_raw_df)
+    print("✅ Jugadores guardados en RAW")
 
-    players_df = build_players_dataframe(GAMES)
-    players_df = players_df.sort_values(by="players", ascending=False)
-    players_df.index = players_df.index + 1
+    # Extraer y guardar metadata
+    metadata_raw_df = build_metadata_dataframe(GAMES)
+    write_metadata_raw(metadata_raw_df)
+    print("✅ Metadata guardada en RAW")
 
-    write_players_delta(players_df)
-
-    metadata_df = build_metadata_dataframe(GAMES)
-    metadata_df.index = metadata_df.index + 1
-
-    write_metadata_delta(metadata_df)
 
     # ===============================
-    # ETAPA 2: PROCESSED
+    # ETAPA 2: SILVER (CLEANED)
     # ===============================
+    print("\n--- ETAPA 2: SILVER (CLEANED) ---")
 
-    players_raw = load_players_data()
-    metadata_raw = load_metadata_data()
+    # Procesar players
+    players_raw = load_raw_players()
+    players_silver = clean_players_data(players_raw)
+    write_silver_players(players_silver)
+    print("✅ Jugadores procesados y guardados en SILVER")
 
-    processed_df = process_players_data(players_raw, metadata_raw)
+    # Procesar metadata (según observación del profe)
+    metadata_raw = load_raw_metadata()
+    metadata_silver = clean_metadata_data(metadata_raw)
+    write_silver_metadata(metadata_silver)
+    print("✅ Metadata procesada y guardada en SILVER")
 
-    print("\nProcessed data preview:")
-    print(processed_df)
 
-    if not processed_df.empty:
-        write_processed_players(processed_df)
+    # ===============================
+    # ETAPA 3: GOLD (AGGREGATED)
+    # ===============================
+    print("\n--- ETAPA 3: GOLD (AGGREGATED) ---")
+
+    # Cargar datos desde SILVER para las agregaciones
+    p_silver = load_silver_players()
+    m_silver = load_silver_metadata()
+
+    # Crear tabla de agregaciones
+    gold_df = create_gold_aggregations(p_silver, m_silver)
+
+    print("\nGold data preview (Aggregations):")
+    print(gold_df)
+
+    if not gold_df.empty:
+        write_gold_players_stats(gold_df)
+        print("✅ Estadísticas finales guardadas en GOLD")
 
 
 if __name__ == "__main__":
     main()
+1

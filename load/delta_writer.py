@@ -3,8 +3,8 @@ from datetime import datetime
 import os
 
 
-def write_players_delta(df):
-    """Guarda datos de jugadores en Delta Lake (raw) con particionado temporal."""
+def write_players_raw(df):
+    """Guarda datos de jugadores en Delta Lake (raw/bronze) con particionado temporal."""
 
     now = datetime.now()
 
@@ -24,33 +24,48 @@ def write_players_delta(df):
 
     write_deltalake(
         path,
-        df.reset_index(drop=True),
+        df,
         mode="append",  # ingestión incremental
         partition_by=["year", "month", "day", "hour"]
     )
 
 
-def write_metadata_delta(df):
-    """Guarda metadata de juegos (overwrite por ser datos estáticos)."""
+def write_metadata_raw(df):
+    """Guarda metadata de juegos en (raw/bronze)."""
 
     path = "data_lake/raw/steam_games_metadata"
     os.makedirs(path, exist_ok=True)
 
     write_deltalake(
         path,
-        df.reset_index(drop=True),
+        df,
         mode="overwrite"
     )
 
 
-def write_processed_players(df):
-    """Guarda datos procesados en la capa processed."""
-
-    path = "data_lake/processed/steam_players"
+def write_silver_players(df):
+    """Guarda datos de jugadores limpios en la capa Silver."""
+    path = "data_lake/silver/steam_players"
     os.makedirs(path, exist_ok=True)
+    write_deltalake(path, df, mode="overwrite")
 
-    write_deltalake(
-        path,
-        df.reset_index(drop=True),
-        mode="overwrite",
-    )
+
+def write_silver_metadata(df):
+    """Guarda metadata de juegos en la capa Silver."""
+    path = "data_lake/silver/steam_games_metadata"
+    os.makedirs(path, exist_ok=True)
+    write_deltalake(path, df, mode="overwrite")
+
+
+import shutil
+
+def write_gold_players_stats(df):
+    """Guarda datos agregados y finales en la capa Gold."""
+    path = "data_lake/gold/steam_players_stats"
+    
+    # Limpieza manual para evitar errores de esquema
+    if os.path.exists(path):
+        shutil.rmtree(path)
+    
+    os.makedirs(path, exist_ok=True)
+    write_deltalake(path, df, mode="overwrite")

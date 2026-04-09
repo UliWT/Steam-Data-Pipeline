@@ -8,6 +8,12 @@ entorno/
 venv/
 .env/
 
+# Gemini CLI & gentle-ai
+.gemini*
+gentle-ai
+install_gentle.sh
+gentle.ai
+
 # Data lake generated data
 data_lake/
 

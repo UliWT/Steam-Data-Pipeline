@@ -1,7 +1,5 @@
 from config.games import GAMES
 from extract.steam_api import get_game_metadata, get_player_count
-from load.delta_writer import write_players_delta
-from load.delta_writer import write_metadata_delta
 
 import pandas as pd
 from datetime import datetime
